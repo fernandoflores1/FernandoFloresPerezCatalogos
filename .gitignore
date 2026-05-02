@@ -1,0 +1,25 @@
+# Configuración local con API Key (NUNCA subir a GitHub)
+assets/js/config.js
+
+# Dependencias de Node (si las hubiera en el futuro)
+node_modules/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de editores
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Logs
+*.log
+npm-debug.log*
+
+# Variables de entorno locales
+.env
+.env.local
+.env.*.local

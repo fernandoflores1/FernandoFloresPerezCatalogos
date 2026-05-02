@@ -1,0 +1,549 @@
+/* =====================================================================
+   sections.css — Estilos de cabecera, secciones y componentes
+   Proyecto: Web Fernando Flores Pérez — Casamayor Librada
+   ===================================================================== */
+
+/* ================================================================== */
+/* CABECERA FIJA                                                        */
+/* ================================================================== */
+
+#header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--header-height);
+  background-color: var(--bg-header);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    background-color var(--transition-theme),
+    box-shadow var(--transition-base);
+}
+
+/* Sombra extra al hacer scroll */
+#header.scrolled {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+.header-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Logo */
+.logo-link {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.logo-img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  /* Filtro para que el logo luzca bien sobre fondo oscuro */
+  filter: brightness(1.1);
+}
+
+/* Navegación */
+#nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.nav-link {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  letter-spacing: 0.02em;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.nav-link.active {
+  background-color: rgba(201, 168, 76, 0.25);
+  color: #FFFFFF;
+}
+
+/* Botón de tema */
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  color: rgba(255, 255, 255, 0.88);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  flex-shrink: 0;
+  margin-left: var(--space-1);
+}
+
+.theme-btn:hover {
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Visibilidad del icono sol/luna según tema activo */
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="dark"]  .icon-sun  { display: none; }
+
+/* ================================================================== */
+/* SECCIÓN 1: SOBRE MÍ                                                 */
+/* ================================================================== */
+
+.section-about {
+  padding-block: var(--space-7);
+  padding-top: calc(var(--header-height) + var(--space-7));
+  background-color: var(--bg-secondary);
+  transition: background-color var(--transition-theme);
+}
+
+.about-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+}
+
+/* Foto circular */
+.profile-photo-wrapper {
+  flex-shrink: 0;
+}
+
+.profile-photo {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  border: 4px solid var(--color-accent);
+  box-shadow: var(--shadow-md);
+  transition: box-shadow var(--transition-base), border-color var(--transition-theme);
+}
+
+/* Información */
+.about-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 620px;
+}
+
+.about-name {
+  color: var(--color-brand);
+  transition: color var(--transition-theme);
+  /* Línea decorativa dorada debajo del nombre */
+  position: relative;
+  padding-bottom: var(--space-2);
+}
+
+.about-name::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+}
+
+.about-title {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  transition: color var(--transition-theme);
+}
+
+.about-bio {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+  transition: color var(--transition-theme);
+}
+
+/* ---- Tarjetas de contacto ---- */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+.contact-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition:
+    background-color var(--transition-theme),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+
+/* Solo aplicar hover lift en tarjetas clicables (teléfono y dirección) */
+a.contact-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+a.contact-card:hover .contact-icon {
+  color: var(--color-accent);
+}
+
+.contact-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-brand);
+  flex-shrink: 0;
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-theme);
+}
+
+.contact-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  transition: color var(--transition-theme);
+}
+
+.contact-value {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 400;
+  line-height: 1.5;
+  transition: color var(--transition-theme);
+}
+
+/* ================================================================== */
+/* RESPONSIVE SECCIÓN SOBRE MÍ — Tablet / Desktop                      */
+/* ================================================================== */
+
+@media (min-width: 768px) {
+  .about-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--space-6);
+  }
+
+  .profile-photo {
+    width: 210px;
+    height: 210px;
+  }
+
+  .about-info {
+    align-items: flex-start;
+  }
+
+  .about-name::after {
+    left: 0;
+    transform: none;
+  }
+
+  .contact-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ================================================================== */
+/* SECCIÓN 2: CATÁLOGOS                                                */
+/* ================================================================== */
+
+.section-catalogs {
+  padding-block: var(--space-7);
+  background-color: var(--bg-primary);
+  transition: background-color var(--transition-theme);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-5);
+}
+
+.section-title {
+  color: var(--text-primary);
+  transition: color var(--transition-theme);
+  margin-bottom: var(--space-2);
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin-inline: auto;
+  transition: color var(--transition-theme);
+}
+
+/* ---- Cuadrícula de carpetas ---- */
+.catalogs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .catalogs-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .catalogs-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ---- Tarjeta de carpeta ---- */
+.folder-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-theme),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+
+.folder-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.folder-card.open {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+
+/* Encabezado de la tarjeta */
+.folder-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  text-align: center;
+  user-select: none;
+}
+
+.folder-icon {
+  color: var(--color-accent);
+  transition: transform var(--transition-base), color var(--transition-theme);
+}
+
+.folder-card:hover .folder-icon,
+.folder-card.open .folder-icon {
+  transform: scale(1.1);
+}
+
+.folder-name {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+  word-break: break-word;
+  transition: color var(--transition-theme);
+}
+
+.folder-chevron {
+  color: var(--text-secondary);
+  transition: transform var(--transition-base), color var(--transition-theme);
+  margin-top: auto;
+}
+
+.folder-card.open .folder-chevron {
+  transform: rotate(180deg);
+  color: var(--color-accent);
+}
+
+/* ---- Lista de PDFs ---- */
+.pdf-list {
+  border-top: 1px solid var(--border);
+  padding: 0;
+  transition:
+    border-color var(--transition-theme),
+    max-height 0.4s ease;
+}
+
+.pdf-list.open {
+  padding: var(--space-1) 0;
+}
+
+.pdf-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--space-2);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  text-decoration: none;
+}
+
+.pdf-item:hover {
+  background-color: rgba(201, 168, 76, 0.1);
+}
+
+.pdf-icon {
+  color: #D9534F;
+  flex-shrink: 0;
+  transition: color var(--transition-theme);
+}
+
+.pdf-name {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  word-break: break-word;
+  transition: color var(--transition-theme);
+}
+
+/* ---- Estado de carpeta vacía ---- */
+.folder-empty {
+  padding: var(--space-2);
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ---- Cargando PDFs dentro de carpeta ---- */
+.folder-loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2);
+}
+
+.folder-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ---- Spinner global (primera carga) ---- */
+.spinner-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-3);
+}
+
+.spinner-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: color var(--transition-theme);
+}
+
+/* ---- Mensaje de error ---- */
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-3);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.error-message svg {
+  color: #C9A84C;
+  opacity: 0.7;
+}
+
+.error-message p {
+  font-size: 0.95rem;
+  max-width: 380px;
+}
+
+/* ================================================================== */
+/* PIE DE PÁGINA                                                        */
+/* ================================================================== */
+
+.site-footer {
+  background-color: var(--color-brand);
+  color: rgba(255, 255, 255, 0.75);
+  padding-block: var(--space-3);
+  transition: background-color var(--transition-theme);
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.footer-brand {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-heading);
+}
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+@media (min-width: 640px) {
+  .footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}

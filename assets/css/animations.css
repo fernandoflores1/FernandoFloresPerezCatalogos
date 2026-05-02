@@ -1,0 +1,121 @@
+/* =====================================================================
+   animations.css — Keyframes y efectos de entrada/transición
+   Proyecto: Web Fernando Flores Pérez — Casamayor Librada
+   ===================================================================== */
+
+/* ------------------------------------------------------------------ */
+/* 1. CARGA INICIAL — fade-in del body                                 */
+/* ------------------------------------------------------------------ */
+@keyframes bodyFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+body {
+  animation: bodyFadeIn 0.4s ease forwards;
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. SCROLL REVEAL — efecto de entrada de secciones y tarjetas        */
+/* ------------------------------------------------------------------ */
+
+/* Estado inicial: invisible y desplazado hacia abajo */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity  0.55s ease,
+    transform 0.55s ease;
+}
+
+/* Estado visible: aplicado por IntersectionObserver en main.js */
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Retraso escalonado para grupos de elementos (stagger) */
+.reveal:nth-child(2) { transition-delay: 0.08s; }
+.reveal:nth-child(3) { transition-delay: 0.16s; }
+.reveal:nth-child(4) { transition-delay: 0.24s; }
+.reveal:nth-child(5) { transition-delay: 0.32s; }
+.reveal:nth-child(6) { transition-delay: 0.40s; }
+
+/* ------------------------------------------------------------------ */
+/* 3. SPINNER DE CARGA (catálogos Drive)                               */
+/* ------------------------------------------------------------------ */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--border);
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. EXPANSIÓN DE LA LISTA DE PDFs dentro de carpeta                  */
+/* ------------------------------------------------------------------ */
+.pdf-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.pdf-list.open {
+  max-height: 800px; /* valor suficientemente alto */
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. APARICIÓN DE TARJETAS DE CATÁLOGO (desde drive.js)               */
+/* ------------------------------------------------------------------ */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.folder-card {
+  animation: cardAppear 0.4s ease both;
+}
+
+/* Retraso escalonado calculado dinámicamente con CSS custom property */
+.folder-card { animation-delay: calc(var(--card-index, 0) * 0.07s); }
+
+/* ------------------------------------------------------------------ */
+/* 6. PULSO SUAVE EN EL SEPARADOR DORADO                               */
+/* ------------------------------------------------------------------ */
+@keyframes accentPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. RESPETAR PREFERENCIAS DE ACCESIBILIDAD                           */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pdf-list {
+    transition: none;
+  }
+}

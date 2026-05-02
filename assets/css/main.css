@@ -1,0 +1,216 @@
+/* =====================================================================
+   main.css — Variables, reset, tipografía y layout base
+   Proyecto: Web Fernando Flores Pérez — Casamayor Librada
+   ===================================================================== */
+
+/* ------------------------------------------------------------------ */
+/* 1. IMPORTAR GOOGLE FONTS (respaldo si el HTML no las carga)         */
+/* ------------------------------------------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;500&display=swap');
+
+/* ------------------------------------------------------------------ */
+/* 2. VARIABLES DE COLOR — MODO CLARO (por defecto)                    */
+/* ------------------------------------------------------------------ */
+:root {
+  /* Colores de marca */
+  --color-brand:        #1B2A6B;
+  --color-brand-light:  #2E4A9E;
+  --color-accent:       #C9A84C;
+  --color-accent-light: #EDD98A;
+
+  /* Fondos */
+  --bg-primary:   #F4F6FB;
+  --bg-secondary: #FFFFFF;
+  --bg-card:      #FFFFFF;
+  --bg-header:    rgba(27, 42, 107, 0.97);
+
+  /* Textos */
+  --text-primary:   #1A1F33;
+  --text-secondary: #4A5270;
+  --text-on-brand:  #FFFFFF;
+
+  /* Bordes y sombras */
+  --border:         #D8DEF0;
+  --border-hover:   #C9A84C;
+  --shadow-sm:      0 2px 8px rgba(27, 42, 107, 0.08);
+  --shadow-md:      0 6px 24px rgba(27, 42, 107, 0.13);
+  --shadow-lg:      0 12px 40px rgba(27, 42, 107, 0.18);
+
+  /* Tipografía */
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body:    'Lora', Georgia, serif;
+
+  /* Espaciado */
+  --space-1:  8px;
+  --space-2:  16px;
+  --space-3:  24px;
+  --space-4:  32px;
+  --space-5:  48px;
+  --space-6:  64px;
+  --space-7:  80px;
+  --space-8:  96px;
+
+  /* Layout */
+  --container-max: 1100px;
+  --header-height: 68px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-full: 9999px;
+
+  /* Transiciones */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+  --transition-theme:  300ms ease;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. VARIABLES — MODO OSCURO                                          */
+/* ------------------------------------------------------------------ */
+[data-theme="dark"] {
+  --color-brand:        #2E4A9E;
+  --color-brand-light:  #4A6FD4;
+  --color-accent:       #D4B865;
+  --color-accent-light: #EDD98A;
+
+  --bg-primary:   #0E1728;
+  --bg-secondary: #162040;
+  --bg-card:      #1B2A4E;
+  --bg-header:    rgba(14, 23, 40, 0.97);
+
+  --text-primary:   #E8EEF7;
+  --text-secondary: #9BABC9;
+  --text-on-brand:  #FFFFFF;
+
+  --border:       #263660;
+  --border-hover: #D4B865;
+  --shadow-sm:    0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md:    0 6px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg:    0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. RESET Y BOX-SIZING                                               */
+/* ------------------------------------------------------------------ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. BASE HTML / BODY                                                 */
+/* ------------------------------------------------------------------ */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  /* Offset de scroll para la cabecera fija */
+  scroll-padding-top: calc(var(--header-height) + 16px);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  /* Transición suave al cambiar de tema */
+  transition:
+    background-color var(--transition-theme),
+    color var(--transition-theme);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. TIPOGRAFÍA BASE                                                  */
+/* ------------------------------------------------------------------ */
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  color: var(--text-primary);
+  transition: color var(--transition-theme);
+}
+
+h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 700; }
+h2 { font-size: clamp(1.5rem, 4vw, 2rem);   font-weight: 700; }
+h3 { font-size: 1.2rem;                      font-weight: 400; }
+
+p {
+  color: var(--text-secondary);
+  transition: color var(--transition-theme);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+}
+
+/* Focus visible para accesibilidad */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. CONTENEDOR PRINCIPAL                                             */
+/* ------------------------------------------------------------------ */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-inline: var(--space-5);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. SEPARADOR DECORATIVO                                             */
+/* ------------------------------------------------------------------ */
+.divider {
+  width: 48px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  margin-block: var(--space-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. SCROLLBAR PERSONALIZADA (navegadores webkit)                     */
+/* ------------------------------------------------------------------ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-brand-light); }
+
+/* ------------------------------------------------------------------ */
+/* 10. RESPONSIVE FONT SIZE                                            */
+/* ------------------------------------------------------------------ */
+@media (min-width: 1024px) {
+  html { font-size: 17px; }
+}
