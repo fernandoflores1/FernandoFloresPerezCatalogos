@@ -10,11 +10,11 @@
   const DARK        = 'dark';
   const LIGHT       = 'light';
 
-  // Lee la preferencia guardada, o detecta la del sistema
+  // Lee la preferencia guardada; si no hay ninguna, usa modo claro por defecto
   function getPreferredTheme() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === DARK || stored === LIGHT) return stored;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? DARK : LIGHT;
+    return LIGHT; // siempre claro si el usuario no ha elegido antes
   }
 
   // Aplica el tema al elemento <html> y actualiza el aria-label del botón
@@ -46,11 +46,12 @@
       localStorage.setItem(STORAGE_KEY, next);
     });
 
-    // Escuchar cambios del sistema operativo en tiempo real
+    // Solo sincronizar con el sistema si el usuario ya ha elegido manualmente
+    // (si no ha elegido, mantenemos el default claro)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-      // Solo actualizar si el usuario no ha elegido manualmente
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        applyTheme(e.matches ? DARK : LIGHT);
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === DARK || stored === LIGHT) {
+        // no hacer nada: el usuario tiene su propia preferencia guardada
       }
     });
   });

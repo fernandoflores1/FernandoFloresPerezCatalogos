@@ -69,30 +69,42 @@
 /* 3. VARIABLES — MODO OSCURO                                          */
 /* ------------------------------------------------------------------ */
 [data-theme="dark"] {
-  --color-brand:        #2E4A9E;
-  --color-brand-light:  #4A6FD4;
-  --color-accent:       #D4B865;
-  --color-accent-light: #EDD98A;
+  /* Fondos con jerarquía clara y diferenciada */
+  --bg-primary:   #080E1C;          /* casi negro, fondo de página */
+  --bg-secondary: #0F1828;          /* secciones alternas */
+  --bg-card:      #172035;          /* tarjetas: claramente distintas del fondo */
+  --bg-header:    rgba(5, 9, 20, 0.97);
 
-  --bg-primary:   #0E1728;
-  --bg-secondary: #162040;
-  --bg-card:      #1B2A4E;
-  --bg-header:    rgba(14, 23, 40, 0.97);
+  /* Marca */
+  --color-brand:        #4268D0;    /* azul más luminoso sobre fondo oscuro */
+  --color-brand-light:  #6085E8;
 
-  --text-primary:   #E8EEF7;
-  --text-secondary: #9BABC9;
+  /* Acento dorado, más vivaz en oscuro */
+  --color-accent:       #E8C96A;
+  --color-accent-light: #F5E0A0;
+
+  /* Textos con contraste bien diferenciado */
+  --text-primary:   #D8E4F6;        /* blanco cálido, no puro para no cansar */
+  --text-secondary: #8A9EC0;        /* gris-azulado legible sobre fondos oscuros */
   --text-on-brand:  #FFFFFF;
 
-  --border:       #263660;
-  --border-hover: #D4B865;
-  --shadow-sm:    0 2px 8px rgba(0, 0, 0, 0.25);
-  --shadow-md:    0 6px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg:    0 12px 40px rgba(0, 0, 0, 0.45);
+  /* Bordes visibles pero sutiles */
+  --border:       #1C2B45;          /* borde: tono entre card y fondo */
+  --border-hover: #E8C96A;
+
+  /* Sombras más pronunciadas en oscuro */
+  --shadow-sm:    0 2px 10px rgba(0, 0, 0, 0.50);
+  --shadow-md:    0 6px 28px rgba(0, 0, 0, 0.60);
+  --shadow-lg:    0 14px 44px rgba(0, 0, 0, 0.70);
 }
 
 /* ------------------------------------------------------------------ */
 /* 4. RESET Y BOX-SIZING                                               */
 /* ------------------------------------------------------------------ */
+
+/* CRÍTICO: evita que display: flex/grid de otras reglas anule hidden */
+[hidden] { display: none !important; }
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
