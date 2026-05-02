@@ -1,11 +1,6 @@
 {
   "buildCommand": "node build.js",
   "installCommand": "",
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
