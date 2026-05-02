@@ -101,7 +101,29 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* 7. RESPETAR PREFERENCIAS DE ACCESIBILIDAD                           */
+/* 7. MODAL — animaciones de entrada                                   */
+/* ------------------------------------------------------------------ */
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+.modal-overlay {
+  animation: modalFadeIn 0.2s ease forwards;
+}
+
+.modal-box {
+  animation: modalSlideUp 0.28s ease forwards;
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. RESPETAR PREFERENCIAS DE ACCESIBILIDAD                           */
 /* ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
