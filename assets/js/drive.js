@@ -45,6 +45,9 @@
     var respuesta = await fetch('/api/catalogos?' + params.toString());
 
     if (!respuesta.ok) {
+      var cuerpo = '';
+      try { cuerpo = await respuesta.text(); } catch (e) {}
+      console.error('[drive.js] Respuesta del servidor:', respuesta.status, cuerpo);
       throw new Error('Error del servidor: ' + respuesta.status);
     }
 
