@@ -1,57 +1,94 @@
 // =====================================================================
-// drive.js — Conexión y renderizado de catálogos desde Google Drive
-// Proyecto: Web Fernando Flores Pérez — Casamayor Librada
+// drive.js — Carga y renderizado de catálogos desde Google Drive
 //
-// SEGURIDAD: Nunca se usa innerHTML con datos de la API.
-//            Todos los textos externos se insertan con textContent.
+// En PRODUCCIÓN (Vercel): usa /api/catalogos (proxy servidor).
+//   → La API key NUNCA llega al navegador.
+//
+// En LOCAL (localhost): llama directamente a Drive API con config.js.
+//   → Solo para desarrollo; la key no sale de tu máquina.
+//
+// SEGURIDAD: nunca se usa innerHTML con datos externos.
+//            Todos los textos se insertan con textContent.
 // =====================================================================
 
 (function () {
   'use strict';
 
-  // URL base de la API pública de Google Drive v3
-  const DRIVE_BASE = 'https://www.googleapis.com/drive/v3/files';
+  var DRIVE_BASE  = 'https://www.googleapis.com/drive/v3/files';
+  var MIME_FOLDER = 'application/vnd.google-apps.folder';
+  var MIME_PDF    = 'application/pdf';
 
-  // Campos que pedimos para minimizar la respuesta
-  const FIELDS_FOLDERS = 'files(id,name,mimeType)';
-  const FIELDS_PDFS    = 'files(id,name,mimeType)';
-  const MIME_FOLDER    = 'application/vnd.google-apps.folder';
-  const MIME_PDF       = 'application/pdf';
+  // Detectar si estamos en local para elegir el modo de llamada
+  var ES_LOCAL = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
 
   // ----------------------------------------------------------------
-  // Obtiene los archivos hijos de una carpeta dado su ID
+  // Obtener hijos de una carpeta
   // ----------------------------------------------------------------
   async function fetchChildren(folderId, mimeType) {
-    const apiKey   = CONFIG.DRIVE_API_KEY;
-    const mimeFilter = mimeType ? ` and mimeType='${mimeType}'` : '';
-
-    // Construcción manual de la URL (sin template literals con datos externos)
-    const params = new URLSearchParams({
-      q:      "'" + folderId + "' in parents and trashed=false" + mimeFilter,
-      fields:  mimeType === MIME_FOLDER ? FIELDS_FOLDERS : FIELDS_PDFS,
-      orderBy: 'name',
-      key:     apiKey,
-      pageSize: '100'
-    });
-
-    const url = DRIVE_BASE + '?' + params.toString();
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error('Error al conectar con Google Drive: ' + response.status);
-    }
-
-    const data = await response.json();
-    return data.files || [];
+    return ES_LOCAL
+      ? fetchDirecto(folderId, mimeType)
+      : fetchProxy(folderId, mimeType);
   }
 
   // ----------------------------------------------------------------
-  // Crea el icono SVG de carpeta (no depende de ninguna librería)
+  // Modo producción: proxy seguro en el servidor de Vercel
+  // La API key se queda en el servidor y nunca llega al navegador.
   // ----------------------------------------------------------------
-  function createFolderIcon(size) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', size || '40');
-    svg.setAttribute('height', size || '40');
+  async function fetchProxy(folderId, mimeType) {
+    var esCarpe  = mimeType === MIME_FOLDER;
+    var params   = new URLSearchParams(
+      esCarpe
+        ? { accion: 'carpetas' }
+        : { accion: 'archivos', carpeta: folderId }
+    );
+
+    var respuesta = await fetch('/api/catalogos?' + params.toString());
+
+    if (!respuesta.ok) {
+      throw new Error('Error del servidor: ' + respuesta.status);
+    }
+
+    var datos = await respuesta.json();
+    return datos.files || [];
+  }
+
+  // ----------------------------------------------------------------
+  // Modo local: llamada directa a Drive API (usa config.js local)
+  // ----------------------------------------------------------------
+  async function fetchDirecto(folderId, mimeType) {
+    if (
+      typeof CONFIG === 'undefined' ||
+      !CONFIG.DRIVE_API_KEY ||
+      CONFIG.DRIVE_API_KEY === 'TU_API_KEY_AQUI'
+    ) {
+      throw new Error('API Key no configurada en config.js para desarrollo local');
+    }
+
+    var params = new URLSearchParams({
+      q:        "'" + folderId + "' in parents and trashed=false and mimeType='" + mimeType + "'",
+      fields:   'files(id,name)',
+      orderBy:  'name',
+      pageSize: '100',
+      key:      CONFIG.DRIVE_API_KEY
+    });
+
+    var respuesta = await fetch(DRIVE_BASE + '?' + params.toString());
+
+    if (!respuesta.ok) {
+      throw new Error('Error Drive API: ' + respuesta.status);
+    }
+
+    var datos = await respuesta.json();
+    return datos.files || [];
+  }
+
+  // ----------------------------------------------------------------
+  // Crear icono SVG de carpeta
+  // ----------------------------------------------------------------
+  function crearIconoCarpeta(tam) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width',  tam || '40');
+    svg.setAttribute('height', tam || '40');
     svg.setAttribute('viewBox', '0 0 24 24');
     svg.setAttribute('fill', 'none');
     svg.setAttribute('stroke', 'currentColor');
@@ -59,18 +96,17 @@
     svg.setAttribute('stroke-linecap', 'round');
     svg.setAttribute('stroke-linejoin', 'round');
     svg.setAttribute('aria-hidden', 'true');
-
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z');
     svg.appendChild(path);
     return svg;
   }
 
   // ----------------------------------------------------------------
-  // Crea el icono SVG de PDF
+  // Crear icono SVG de PDF
   // ----------------------------------------------------------------
-  function createPdfIcon() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  function crearIconoPdf() {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '18');
     svg.setAttribute('height', '18');
     svg.setAttribute('viewBox', '0 0 24 24');
@@ -81,22 +117,20 @@
     svg.setAttribute('stroke-linejoin', 'round');
     svg.setAttribute('class', 'pdf-icon');
     svg.setAttribute('aria-hidden', 'true');
-
-    const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    var p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     p1.setAttribute('d', 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
-    const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    var p2 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     p2.setAttribute('points', '14 2 14 8 20 8');
-
     svg.appendChild(p1);
     svg.appendChild(p2);
     return svg;
   }
 
   // ----------------------------------------------------------------
-  // Crea el icono de chevron (flecha)
+  // Crear icono de chevron (flecha)
   // ----------------------------------------------------------------
-  function createChevronIcon() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  function crearIconoChevron() {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '16');
     svg.setAttribute('height', '16');
     svg.setAttribute('viewBox', '0 0 24 24');
@@ -107,83 +141,77 @@
     svg.setAttribute('stroke-linejoin', 'round');
     svg.setAttribute('class', 'folder-chevron');
     svg.setAttribute('aria-hidden', 'true');
-
-    const pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    var pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     pl.setAttribute('points', '6 9 12 15 18 9');
     svg.appendChild(pl);
     return svg;
   }
 
   // ----------------------------------------------------------------
-  // Abre / cierra la lista de PDFs de una carpeta
+  // Abrir / cerrar la lista de PDFs de una tarjeta de carpeta
   // ----------------------------------------------------------------
-  async function toggleFolder(card, folderId) {
-    const isOpen  = card.classList.contains('open');
-    const pdfList = card.querySelector('.pdf-list');
+  async function toggleCarpeta(card, folderId) {
+    var estaAbierta = card.classList.contains('open');
+    var pdfList     = card.querySelector('.pdf-list');
 
-    if (isOpen) {
-      // Cerrar
+    if (estaAbierta) {
       card.classList.remove('open');
       pdfList.classList.remove('open');
+      card.setAttribute('aria-expanded', 'false');
       return;
     }
 
-    // Abrir: marcar como abierta de inmediato
     card.classList.add('open');
     pdfList.classList.add('open');
+    card.setAttribute('aria-expanded', 'true');
 
-    // Si ya tiene contenido cargado no volvemos a pedir
+    // Si ya están cargados no volvemos a pedir
     if (pdfList.dataset.loaded === 'true') return;
 
-    // Mostrar spinner dentro de la tarjeta
-    pdfList.innerHTML = '';
-    const loadingDiv = document.createElement('div');
+    // Spinner dentro de la tarjeta
+    while (pdfList.firstChild) pdfList.removeChild(pdfList.firstChild);
+    var loadingDiv = document.createElement('div');
     loadingDiv.className = 'folder-loading';
-    const spinner = document.createElement('div');
+    var spinner = document.createElement('div');
     spinner.className = 'folder-spinner';
     loadingDiv.appendChild(spinner);
     pdfList.appendChild(loadingDiv);
 
     try {
-      const pdfs = await fetchChildren(folderId, MIME_PDF);
+      var pdfs = await fetchChildren(folderId, MIME_PDF);
 
-      // Limpiar spinner
-      pdfList.innerHTML = '';
+      while (pdfList.firstChild) pdfList.removeChild(pdfList.firstChild);
       pdfList.dataset.loaded = 'true';
 
       if (pdfs.length === 0) {
-        // Carpeta vacía
-        const empty = document.createElement('p');
-        empty.className = 'folder-empty';
-        empty.textContent = 'Esta carpeta no tiene catálogos disponibles.';
-        pdfList.appendChild(empty);
+        var vacio = document.createElement('p');
+        vacio.className   = 'folder-empty';
+        vacio.textContent = 'Esta carpeta no tiene catálogos disponibles.';
+        pdfList.appendChild(vacio);
         return;
       }
 
-      // Crear enlace por cada PDF
       pdfs.forEach(function (pdf) {
-        const link = document.createElement('a');
-        link.className    = 'pdf-item';
-        link.href         = 'https://drive.google.com/file/d/' + encodeURIComponent(pdf.id) + '/view';
-        link.target       = '_blank';
-        link.rel          = 'noopener noreferrer';
-        link.setAttribute('aria-label', 'Abrir catálogo: ' + pdf.name);
+        var link = document.createElement('a');
+        link.className = 'pdf-item';
+        link.href      = 'https://drive.google.com/file/d/' + encodeURIComponent(pdf.id) + '/view';
+        link.target    = '_blank';
+        link.rel       = 'noopener noreferrer';
+        link.setAttribute('aria-label', 'Abrir: ' + pdf.name);
 
-        const icon = createPdfIcon();
+        var nombre = document.createElement('span');
+        nombre.className   = 'pdf-name';
+        nombre.textContent = pdf.name; // textContent siempre, nunca innerHTML
 
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'pdf-name';
-        nameSpan.textContent = pdf.name; // textContent, nunca innerHTML
-
-        link.appendChild(icon);
-        link.appendChild(nameSpan);
+        link.appendChild(crearIconoPdf());
+        link.appendChild(nombre);
         pdfList.appendChild(link);
       });
 
     } catch (err) {
-      pdfList.innerHTML = '';
-      const errMsg = document.createElement('p');
-      errMsg.className = 'folder-empty';
+      while (pdfList.firstChild) pdfList.removeChild(pdfList.firstChild);
+      var errMsg = document.createElement('p');
+      errMsg.className   = 'folder-empty';
       errMsg.textContent = 'No se pudo cargar este catálogo. Inténtalo más tarde.';
       pdfList.appendChild(errMsg);
       console.error('[drive.js] Error al cargar PDFs:', err);
@@ -191,44 +219,39 @@
   }
 
   // ----------------------------------------------------------------
-  // Crea la tarjeta de una carpeta y la añade al grid
+  // Crear la tarjeta visual de una carpeta
   // ----------------------------------------------------------------
-  function createFolderCard(folder, index) {
-    const card = document.createElement('div');
+  function crearTarjetaCarpeta(carpeta, indice) {
+    var card = document.createElement('div');
     card.className = 'folder-card';
-    card.style.setProperty('--card-index', index);
+    card.style.setProperty('--card-index', indice);
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
     card.setAttribute('aria-expanded', 'false');
 
-    // Encabezado de la tarjeta
-    const header = document.createElement('div');
+    var header = document.createElement('div');
     header.className = 'folder-header';
 
-    const iconWrapper = document.createElement('span');
-    iconWrapper.className = 'folder-icon';
-    iconWrapper.appendChild(createFolderIcon(40));
+    var iconoWrapper = document.createElement('span');
+    iconoWrapper.className = 'folder-icon';
+    iconoWrapper.appendChild(crearIconoCarpeta(40));
 
-    const nameEl = document.createElement('span');
-    nameEl.className = 'folder-name';
-    nameEl.textContent = folder.name; // textContent, nunca innerHTML
+    var nombre = document.createElement('span');
+    nombre.className   = 'folder-name';
+    nombre.textContent = carpeta.name; // textContent, nunca innerHTML
 
-    header.appendChild(iconWrapper);
-    header.appendChild(nameEl);
-    header.appendChild(createChevronIcon());
+    header.appendChild(iconoWrapper);
+    header.appendChild(nombre);
+    header.appendChild(crearIconoChevron());
 
-    // Lista de PDFs (inicialmente vacía y cerrada)
-    const pdfList = document.createElement('div');
+    var pdfList = document.createElement('div');
     pdfList.className = 'pdf-list';
 
     card.appendChild(header);
     card.appendChild(pdfList);
 
-    // Abrir/cerrar al hacer clic o presionar Enter/Espacio
     card.addEventListener('click', function () {
-      const expanded = card.classList.contains('open');
-      card.setAttribute('aria-expanded', String(!expanded));
-      toggleFolder(card, folder.id);
+      toggleCarpeta(card, carpeta.id);
     });
 
     card.addEventListener('keydown', function (e) {
@@ -242,37 +265,43 @@
   }
 
   // ----------------------------------------------------------------
-  // Punto de entrada: carga las carpetas raíz y renderiza el grid
+  // Punto de entrada: carga las carpetas raíz y construye el grid
   // ----------------------------------------------------------------
-  async function initCatalogs() {
-    const grid    = document.getElementById('catalogs-grid');
-    const spinner = document.getElementById('catalogs-spinner');
-    const errorEl = document.getElementById('catalogs-error');
-    const errText = document.getElementById('catalogs-error-text');
+  async function iniciarCatalogos() {
+    var grid    = document.getElementById('catalogs-grid');
+    var spinner = document.getElementById('catalogs-spinner');
+    var errorEl = document.getElementById('catalogs-error');
+    var errText = document.getElementById('catalogs-error-text');
 
     if (!grid) return;
 
-    // Verificar que CONFIG existe y tiene los valores necesarios
-    if (
-      typeof CONFIG === 'undefined' ||
-      !CONFIG.DRIVE_API_KEY ||
-      CONFIG.DRIVE_API_KEY === 'TU_API_KEY_AQUI'
-    ) {
-      if (spinner) spinner.hidden = true;
-      if (errorEl) {
-        errorEl.hidden = false;
-        if (errText) errText.textContent = 'Configura la API Key de Google Drive en assets/js/config.js para ver los catálogos.';
+    // En local, verificar que config.js está relleno
+    if (ES_LOCAL) {
+      var sinConfig =
+        typeof CONFIG === 'undefined' ||
+        !CONFIG.DRIVE_API_KEY ||
+        CONFIG.DRIVE_API_KEY === 'TU_API_KEY_AQUI';
+
+      if (sinConfig) {
+        if (spinner) spinner.hidden = true;
+        if (errorEl) {
+          errorEl.hidden = false;
+          if (errText) errText.textContent = 'Rellena DRIVE_API_KEY en assets/js/config.js para ver los catálogos en local.';
+        }
+        return;
       }
-      return;
     }
 
-    try {
-      const folders = await fetchChildren(CONFIG.DRIVE_ROOT_FOLDER_ID, MIME_FOLDER);
+    var folderId = (typeof CONFIG !== 'undefined' && CONFIG.DRIVE_ROOT_FOLDER_ID)
+      ? CONFIG.DRIVE_ROOT_FOLDER_ID
+      : '1oHM88zT4X7PNdjLpkU8m6bIDGE5D4W24';
 
-      // Ocultar spinner
+    try {
+      var carpetas = await fetchChildren(folderId, MIME_FOLDER);
+
       if (spinner) spinner.hidden = true;
 
-      if (folders.length === 0) {
+      if (carpetas.length === 0) {
         if (errorEl) {
           errorEl.hidden = false;
           if (errText) errText.textContent = 'Aún no hay catálogos disponibles. Vuelve pronto.';
@@ -280,10 +309,8 @@
         return;
       }
 
-      // Renderizar las tarjetas
-      folders.forEach(function (folder, i) {
-        const card = createFolderCard(folder, i);
-        grid.appendChild(card);
+      carpetas.forEach(function (carpeta, i) {
+        grid.appendChild(crearTarjetaCarpeta(carpeta, i));
       });
 
     } catch (err) {
@@ -296,7 +323,6 @@
     }
   }
 
-  // Iniciar cuando el DOM esté listo
-  document.addEventListener('DOMContentLoaded', initCatalogs);
+  document.addEventListener('DOMContentLoaded', iniciarCatalogos);
 
 })();

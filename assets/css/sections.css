@@ -615,3 +615,116 @@ a.contact-card:hover .contact-icon {
   background-color: #050A15;
   border-top: 1px solid var(--border);
 }
+
+/* ================================================================== */
+/* DESKTOP — mejor aprovechamiento del espacio (1024px+)               */
+/* ================================================================== */
+
+@media (min-width: 1024px) {
+
+  /* Secciones con más aire vertical */
+  .section-about,
+  .section-catalogs {
+    padding-block: 100px;
+  }
+
+  .section-about {
+    padding-top: calc(var(--header-height) + 100px);
+  }
+
+  /* Foto más grande y con más espacio */
+  .profile-photo {
+    width: 240px;
+    height: 240px;
+  }
+
+  /* Más separación entre foto e información */
+  .about-layout {
+    gap: 72px;
+    align-items: center;
+  }
+
+  /* El bloque de texto no se comprime */
+  .about-info {
+    max-width: none;
+    flex: 1;
+  }
+
+  /* Bio legible: máximo 65 caracteres por línea */
+  .about-bio {
+    max-width: 56ch;
+    font-size: 1.05rem;
+  }
+
+  /* Tarjetas de contacto con más padding interno */
+  .contact-card {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  /* Catálogos: tarjetas con más altura y padding */
+  .folder-header {
+    padding: var(--space-4) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .folder-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .folder-name {
+    font-size: 0.92rem;
+  }
+
+  /* Grid de catálogos con columnas más anchas */
+  .catalogs-grid {
+    gap: var(--space-3);
+  }
+
+  /* Título de sección más espaciado */
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  .section-title {
+    font-size: 2.2rem;
+  }
+}
+
+/* ================================================================== */
+/* PANTALLAS MUY ANCHAS (1280px+) — máximo aprovechamiento             */
+/* ================================================================== */
+
+@media (min-width: 1280px) {
+
+  /* Foto aún más grande */
+  .profile-photo {
+    width: 265px;
+    height: 265px;
+  }
+
+  /* Nombre del encargado más prominente */
+  .about-name {
+    font-size: 3rem;
+  }
+
+  .about-layout {
+    gap: 88px;
+  }
+
+  /* Catálogos en 4 columnas bien proporcionadas */
+  .catalogs-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+  }
+
+  /* Secciones con más espacio vertical */
+  .section-about,
+  .section-catalogs {
+    padding-block: 120px;
+  }
+
+  .section-about {
+    padding-top: calc(var(--header-height) + 120px);
+  }
+}

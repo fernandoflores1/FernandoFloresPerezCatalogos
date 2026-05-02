@@ -1,24 +1,21 @@
 // =====================================================================
-// build.js — Genera assets/js/config.js a partir de variables de entorno
-// Se ejecuta en Vercel antes de servir los archivos estáticos.
-// Localmente no hace falta ejecutarlo: edita config.js directamente.
+// build.js — Genera assets/js/config.js para producción en Vercel
+//
+// IMPORTANTE: en producción la API key NO se escribe aquí.
+// Las llamadas a Drive se hacen desde api/catalogos.js (servidor).
+// Solo se escribe el DRIVE_ROOT_FOLDER_ID, que no es sensible.
 // =====================================================================
 
 const fs = require('fs');
 
-const apiKey   = process.env.DRIVE_API_KEY         || '';
-const folderId = process.env.DRIVE_ROOT_FOLDER_ID  || '1oHM88zT4X7PNdjLpkU8m6bIDGE5D4W24';
+const folderId = process.env.DRIVE_ROOT_FOLDER_ID || '1oHM88zT4X7PNdjLpkU8m6bIDGE5D4W24';
 
-if (!apiKey) {
-  console.warn('[build.js] AVISO: DRIVE_API_KEY no está definida. Los catálogos no cargarán.');
-}
-
-const contenido = `// Generado automáticamente por build.js — no editar a mano en producción
+// En producción no incluimos DRIVE_API_KEY: la usa el servidor, nunca el navegador
+const contenido = `// Generado por build.js — no editar manualmente en producción
 const CONFIG = {
-  DRIVE_API_KEY: '${apiKey}',
   DRIVE_ROOT_FOLDER_ID: '${folderId}'
 };
 `;
 
 fs.writeFileSync('assets/js/config.js', contenido, 'utf8');
-console.log('[build.js] assets/js/config.js generado correctamente.');
+console.log('[build.js] config.js generado (sin API key — usa proxy /api/catalogos).');
