@@ -16,38 +16,36 @@
 
   var DRIVE_BASE  = 'https://www.googleapis.com/drive/v3/files';
   var MIME_FOLDER = 'application/vnd.google-apps.folder';
-  var MIME_PDF    = 'application/pdf';
 
-  // Detectar si estamos en local para elegir el modo de llamada
   var ES_LOCAL = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
 
   // ----------------------------------------------------------------
-  // Obtener hijos de una carpeta
+  // Obtener subcarpetas o archivos de una carpeta
   // ----------------------------------------------------------------
-  async function fetchChildren(folderId, mimeType) {
-    return ES_LOCAL
-      ? fetchDirecto(folderId, mimeType)
-      : fetchProxy(folderId, mimeType);
+  async function fetchCarpetas() {
+    return ES_LOCAL ? fetchDirectoQuery(CONFIG.DRIVE_ROOT_FOLDER_ID, "mimeType='" + MIME_FOLDER + "'")
+                    : fetchProxy('carpetas', null);
+  }
+
+  async function fetchArchivos(folderId) {
+    return ES_LOCAL ? fetchDirectoQuery(folderId, "mimeType!='" + MIME_FOLDER + "'")
+                    : fetchProxy('archivos', folderId);
   }
 
   // ----------------------------------------------------------------
-  // Modo producción: proxy seguro en el servidor de Vercel
-  // La API key se queda en el servidor y nunca llega al navegador.
+  // Modo producción: proxy seguro en Vercel (la API key no sale al navegador)
   // ----------------------------------------------------------------
-  async function fetchProxy(folderId, mimeType) {
-    var esCarpe  = mimeType === MIME_FOLDER;
-    var params   = new URLSearchParams(
-      esCarpe
-        ? { accion: 'carpetas' }
-        : { accion: 'archivos', carpeta: folderId }
-    );
+  async function fetchProxy(accion, carpetaId) {
+    var params = accion === 'carpetas'
+      ? new URLSearchParams({ accion: 'carpetas' })
+      : new URLSearchParams({ accion: 'archivos', carpeta: carpetaId });
 
     var respuesta = await fetch('/api/catalogos?' + params.toString());
 
     if (!respuesta.ok) {
       var cuerpo = '';
       try { cuerpo = await respuesta.text(); } catch (e) {}
-      console.error('[drive.js] Respuesta del servidor:', respuesta.status, cuerpo);
+      console.error('[drive.js] Respuesta servidor:', respuesta.status, cuerpo);
       throw new Error('Error del servidor: ' + respuesta.status);
     }
 
@@ -56,31 +54,21 @@
   }
 
   // ----------------------------------------------------------------
-  // Modo local: llamada directa a Drive API (usa config.js local)
+  // Modo local: llamada directa a Drive API con config.js
   // ----------------------------------------------------------------
-  async function fetchDirecto(folderId, mimeType) {
-    if (
-      typeof CONFIG === 'undefined' ||
-      !CONFIG.DRIVE_API_KEY ||
-      CONFIG.DRIVE_API_KEY === 'TU_API_KEY_AQUI'
-    ) {
-      throw new Error('API Key no configurada en config.js para desarrollo local');
+  async function fetchDirectoQuery(folderId, filtroMime) {
+    if (typeof CONFIG === 'undefined' || !CONFIG.DRIVE_API_KEY || CONFIG.DRIVE_API_KEY === 'TU_API_KEY_AQUI') {
+      throw new Error('API Key no configurada en config.js');
     }
-
     var params = new URLSearchParams({
-      q:        "'" + folderId + "' in parents and trashed=false and mimeType='" + mimeType + "'",
-      fields:   'files(id,name)',
+      q:        "'" + folderId + "' in parents and trashed=false and " + filtroMime,
+      fields:   'files(id,name,mimeType)',
       orderBy:  'name',
       pageSize: '100',
       key:      CONFIG.DRIVE_API_KEY
     });
-
     var respuesta = await fetch(DRIVE_BASE + '?' + params.toString());
-
-    if (!respuesta.ok) {
-      throw new Error('Error Drive API: ' + respuesta.status);
-    }
-
+    if (!respuesta.ok) throw new Error('Error Drive API: ' + respuesta.status);
     var datos = await respuesta.json();
     return datos.files || [];
   }
@@ -106,9 +94,9 @@
   }
 
   // ----------------------------------------------------------------
-  // Crear icono SVG de PDF
+  // Crear icono SVG según tipo de archivo
   // ----------------------------------------------------------------
-  function crearIconoPdf() {
+  function crearIconoArchivo(mimeType) {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '18');
     svg.setAttribute('height', '18');
@@ -118,14 +106,29 @@
     svg.setAttribute('stroke-width', '2');
     svg.setAttribute('stroke-linecap', 'round');
     svg.setAttribute('stroke-linejoin', 'round');
-    svg.setAttribute('class', 'pdf-icon');
     svg.setAttribute('aria-hidden', 'true');
-    var p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p1.setAttribute('d', 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
-    var p2 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    p2.setAttribute('points', '14 2 14 8 20 8');
-    svg.appendChild(p1);
-    svg.appendChild(p2);
+
+    if (mimeType && mimeType.startsWith('image/')) {
+      // Icono de imagen
+      svg.setAttribute('class', 'pdf-icon file-icon--image');
+      var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', '3'); rect.setAttribute('y', '3');
+      rect.setAttribute('width', '18'); rect.setAttribute('height', '18');
+      rect.setAttribute('rx', '2'); rect.setAttribute('ry', '2');
+      var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', '8.5'); circle.setAttribute('cy', '8.5'); circle.setAttribute('r', '1.5');
+      var poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      poly.setAttribute('points', '21 15 16 10 5 21');
+      svg.appendChild(rect); svg.appendChild(circle); svg.appendChild(poly);
+    } else {
+      // Icono de documento (PDF u otro)
+      svg.setAttribute('class', 'pdf-icon file-icon--doc');
+      var p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p1.setAttribute('d', 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
+      var p2 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      p2.setAttribute('points', '14 2 14 8 20 8');
+      svg.appendChild(p1); svg.appendChild(p2);
+    }
     return svg;
   }
 
@@ -181,12 +184,12 @@
     pdfList.appendChild(loadingDiv);
 
     try {
-      var pdfs = await fetchChildren(folderId, MIME_PDF);
+      var archivos = await fetchArchivos(folderId);
 
       while (pdfList.firstChild) pdfList.removeChild(pdfList.firstChild);
       pdfList.dataset.loaded = 'true';
 
-      if (pdfs.length === 0) {
+      if (archivos.length === 0) {
         var vacio = document.createElement('p');
         vacio.className   = 'folder-empty';
         vacio.textContent = 'Esta carpeta no tiene catálogos disponibles.';
@@ -194,19 +197,19 @@
         return;
       }
 
-      pdfs.forEach(function (pdf) {
+      archivos.forEach(function (archivo) {
         var link = document.createElement('a');
         link.className = 'pdf-item';
-        link.href      = 'https://drive.google.com/file/d/' + encodeURIComponent(pdf.id) + '/view';
+        link.href      = 'https://drive.google.com/file/d/' + encodeURIComponent(archivo.id) + '/view';
         link.target    = '_blank';
         link.rel       = 'noopener noreferrer';
-        link.setAttribute('aria-label', 'Abrir: ' + pdf.name);
+        link.setAttribute('aria-label', 'Abrir: ' + archivo.name);
 
         var nombre = document.createElement('span');
         nombre.className   = 'pdf-name';
-        nombre.textContent = pdf.name; // textContent siempre, nunca innerHTML
+        nombre.textContent = archivo.name;
 
-        link.appendChild(crearIconoPdf());
+        link.appendChild(crearIconoArchivo(archivo.mimeType));
         link.appendChild(nombre);
         pdfList.appendChild(link);
       });
@@ -300,7 +303,7 @@
       : '1oHM88zT4X7PNdjLpkU8m6bIDGE5D4W24';
 
     try {
-      var carpetas = await fetchChildren(folderId, MIME_FOLDER);
+      var carpetas = await fetchCarpetas();
 
       if (spinner) spinner.hidden = true;
 

@@ -435,11 +435,9 @@ a.contact-card:hover .contact-icon {
   background-color: rgba(201, 168, 76, 0.1);
 }
 
-.pdf-icon {
-  color: #D9534F;
-  flex-shrink: 0;
-  transition: color var(--transition-theme);
-}
+.pdf-icon { flex-shrink: 0; transition: color var(--transition-theme); }
+.file-icon--doc   { color: #D9534F; }  /* rojo para PDFs y documentos */
+.file-icon--image { color: #3A9E6F; }  /* verde para imágenes */
 
 .pdf-name {
   font-size: 0.82rem;
