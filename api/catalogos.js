@@ -20,6 +20,11 @@ function esIdValido(id) {
 }
 
 module.exports = async function handler(req, res) {
+  // Log de diagnóstico — visible en Vercel → Functions → Logs
+  console.log('[api/catalogos] Petición recibida:', req.method, req.url);
+  console.log('[api/catalogos] DRIVE_API_KEY presente:', !!process.env.DRIVE_API_KEY);
+  console.log('[api/catalogos] DRIVE_ROOT_FOLDER_ID presente:', !!process.env.DRIVE_ROOT_FOLDER_ID);
+
   // Solo aceptar GET
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Método no permitido' });
