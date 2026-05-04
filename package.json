@@ -1,0 +1,12 @@
+{
+  "name": "fernando-flores-perez-catalogos",
+  "version": "1.0.0",
+  "description": "Fernando Flores Pérez — Casamayor Librada",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  }
+}
